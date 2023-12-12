@@ -1,0 +1,41 @@
+.form-group label {
+    /* Style pour le label */
+    color: #107eb1; /* Exemple de couleur */
+  }
+  
+  .form-control {
+    /* Style pour le combobox */
+    background-color: #ffffff;
+    color: #e20412;
+  }
+  
+  /* Ajoutez d'autres styles personnalisés ici si nécessaire */
+  .highlighted-slot {
+    border-radius: 5px;
+  }
+
+  .rbc-day-slot.selected-day {
+    background-color: #ae0e7f !important;
+    color: white !important;
+  }
+
+  .add-sensor-button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #007bff; /* Couleur du bouton */
+    color: #fff; /* Couleur du texte */
+    font-size: 20px;
+    cursor: pointer;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  
+  .form-control {
+    margin-right: 10px;
+    margin-bottom: 10px;
+  }
+  

@@ -1,0 +1,145 @@
+body, html {
+    height: 100%;
+    margin: 0;
+    font-size: 16px;
+    font-family: "Lato", sans-serif;
+    font-weight: 400;
+    line-height: 1.8em;
+    color: #666;
+  }
+  
+  .pimg1, .pimg2, .pimg3 {
+    position: relative;
+    opacity: 1;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+  }
+  
+  .pimg1 {
+    background-image: url("https://images.pexels.com/photos/378570/pexels-photo-378570.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940");
+    min-height: 100%;
+  }
+  
+  .pimg2 {
+    background-image: url("https://www.bourgogne-tourisme.com/uploads/2023/06/dijon-a-lautomne-1600x900-1689155426.jpg");
+    min-height: 400px;
+  }
+  
+  .pimg3 {
+    background-image: url("https://www.capgemini.com/fr-fr/wp-content/uploads/sites/6/2022/08/Capgemini_client-stories_Dijon-Smart-City.webp");
+    min-height: 400px;
+  }
+  
+  .section {
+    text-align: center;
+    padding: 50px 80px;
+  }
+  
+  .section-light {
+    background-color: #f4f4f4;
+    color: #666;
+  }
+  
+  .section-dark {
+    background-color: #282e34;
+    color: #ddd;
+  }
+  
+  .ptext {
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    text-align: center;
+    color: #000;
+    font-size: 27px;
+    letter-spacing: 8px;
+    text-transform: uppercase;
+  }
+  
+  .ptext .border {
+    background-color: #111;
+    color: #fff;
+    padding: 20px;
+  
+  }
+  
+  .ptext .border-trans {
+    background-color: transparent;
+  }
+  
+  @media(max-width){
+    .pimg1, .pimg2, .pimg3 {
+      background-attachment: scroll;
+    }
+  }
+
+  .section-title {
+    font-size: 24px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  
+  .partners-content {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .partners-description {
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+  
+  .partner-list {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .partner-item {
+    margin-bottom: 20px;
+  }
+  
+  .partner-link {
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s;
+  }
+  
+  .partner-link:hover {
+    color: 
+    rgb(160, 160, 164);
+  }
+
+  .contacts-list {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .contact-item {
+    margin-bottom: 20px;
+  }
+  
+  .contact-name {
+    font-weight: bold;
+    font-size: 18px;
+  }
+  
+  .contact-description {
+    font-size: 16px;
+    color: #ccc;
+    margin-bottom: 5px;
+  }
+  
+  .contact-email {
+    color: rgb(160, 160, 164);
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s;
+    font-size: 16px;
+  }
+  
+  .contact-email:hover {
+    color: #000;
+  }
