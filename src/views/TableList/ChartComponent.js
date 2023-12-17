@@ -10,53 +10,43 @@ const ChartComponent = ({ selectedDates, selectedSensorIds }) => {
     const fetchData = async () => {
       try {
         const datasets = [];
-
+    
         for (const sensorId of selectedSensorIds) {
-          const datesQuery = selectedDates.map((date) => `dates=${date}`).join('&');
+          const datesQuery = selectedDates.map((date) => `Dates2=${date}`).join('&');
           const url = `http://localhost:3000/api/data/dashboard/${sensorId}?${datesQuery}`;
           console.log('url renvoye par la requete', url);
           const response = await fetch(url);
           const data = await response.json();
-          const dataPoints = data[0].map((entry) => {
-            const year = parseInt(entry.Year, 10);
-            const month = parseInt(entry.Month, 10) - 1;
-            const day = parseInt(entry.Day, 10);
-            const hour = parseInt(entry.Hour, 10);
-            const minute = parseInt(entry.Minute, 10);
-          
-            // Check if the values are valid numbers
-            if (isNaN(year) || isNaN(month) || isNaN(day) || isNaN(hour) || isNaN(minute)) {
-              console.error('Invalid date:', entry);
-              return null;
-            }
-          
-            const dateValue = new Date(year, month, day, hour, minute);
-          
+    
+          console.log('Received data:', data); // Add this line
+    
+          const dataPoints = data.map((entry) => {
+            const dateValue = new Date(entry.Date);
+    
             // Check if the date is valid
             if (isNaN(dateValue.getTime())) {
               console.error('Invalid date:', entry);
               return null;
             }
-          
+    
             const formattedDate = format(dateValue, 'dd/MM/yyyy HH:mm');
-          
+    
             return {
               name: formattedDate,
               [sensorId]: entry.valeur,
             };
           });
-          
-
+    
           const filteredDataPoints = dataPoints.filter((entry) => entry !== null);
-
+    
           datasets.push({
             sensorId: sensorId,
             data: filteredDataPoints,
           });
         }
-
+    
         setChartData(datasets);
-
+    
         // Ajoutez ces console.log pour voir les valeurs
         console.log('AxX values:', chartData.flatMap((dataset) => dataset.data.map((point) => point.name)));
         console.log('AxY values:', selectedSensorIds);
@@ -65,6 +55,8 @@ const ChartComponent = ({ selectedDates, selectedSensorIds }) => {
         console.error('Error fetching data:', error);
       }
     };
+    
+    
 
     fetchData();
   }, [selectedDates, selectedSensorIds]);
