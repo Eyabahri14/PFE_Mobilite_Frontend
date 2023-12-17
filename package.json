@@ -9,10 +9,12 @@
     "@material-ui/core": "4.11.4",
     "@material-ui/icons": "4.11.2",
     "axios": "^1.6.2",
+    "chart.js": "^2.9.4",
     "chartist": "0.10.1",
     "chartjs-adapter-moment": "^1.0.1",
     "chroma-js": "^2.4.2",
     "classnames": "2.3.1",
+    "date-fns": "^2.30.0",
     "history": "5.0.0",
     "leaflet": "^1.9.4",
     "leaflet-control-geocoder": "^2.4.0",
@@ -35,6 +37,7 @@
     "react-router-dom": "5.2.0",
     "react-scripts": "4.0.3",
     "react-swipeable-views": "0.13.9",
+    "recharts": "^2.10.3",
     "sass": "^1.69.4"
   },
   "scripts": {
