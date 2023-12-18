@@ -5,61 +5,60 @@ import { format } from 'date-fns';
 
 const ChartComponent = ({ selectedDates, selectedSensorIds }) => {
   const [chartData, setChartData] = useState([]);
-
   useEffect(() => {
     const fetchData = async () => {
       try {
         const datasets = [];
+  
+        const datesQuery = selectedDates.map((date) => `Dates2=${date}`).join('&');
+        const sensorIdsQuery = selectedSensorIds.join(',');
+        const url = `http://localhost:3000/api/data/dashboard/${sensorIdsQuery}?${datesQuery}`;
+        console.log('url renvoyé par la requête', url);
+        const response = await fetch(url);
+        const data = await response.json();
+  
     
-        for (const sensorId of selectedSensorIds) {
-          const datesQuery = selectedDates.map((date) => `Dates2=${date}`).join('&');
-          const url = `http://localhost:3000/api/data/dashboard/${sensorId}?${datesQuery}`;
-          console.log('url renvoye par la requete', url);
-          const response = await fetch(url);
-          const data = await response.json();
-    
-          console.log('Received data:', data); // Add this line
-    
-          const dataPoints = data.map((entry) => {
-            const dateValue = new Date(entry.Date);
-    
-            // Check if the date is valid
+        // Assurez-vous que data est défini et est un tableau avant de le parcourir
+        if (Array.isArray(data)) {
+          data.forEach((entry) => {
+            const dateValue = new Date(`${entry.Year}-${entry.Month}-${entry.Day} ${entry.Hour}:${entry.Minute}`);
+  
             if (isNaN(dateValue.getTime())) {
               console.error('Invalid date:', entry);
               return null;
             }
-    
+  
             const formattedDate = format(dateValue, 'dd/MM/yyyy HH:mm');
-    
-            return {
+           // console.log('Formatted date:', formattedDate);
+  
+            datasets.push({
               name: formattedDate,
-              [sensorId]: entry.valeur,
-            };
+              [selectedSensorIds[0]]: entry.valeur,
+            });
+  
+            // Accédez aux valeurs spécifiques du premier élément du tableau (comme exemple)
+            //console.log(`Axe des X: ${formattedDate}`);
+            //console.log(`Axe des Y: ${entry.valeur}`);
           });
-    
-          const filteredDataPoints = dataPoints.filter((entry) => entry !== null);
-    
-          datasets.push({
-            sensorId: sensorId,
-            data: filteredDataPoints,
-          });
+        } else {
+          console.error('Data is not an array:', data);
         }
-    
-        setChartData(datasets);
-    
-        // Ajoutez ces console.log pour voir les valeurs
-        console.log('AxX values:', chartData.flatMap((dataset) => dataset.data.map((point) => point.name)));
-        console.log('AxY values:', selectedSensorIds);
-        console.log('Data values:', chartData.flatMap((dataset) => dataset.data.map((point) => ({ name: point.name, ...point }))));
+  
+        setChartData([{ sensorId: selectedSensorIds[0], data: datasets }]);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
-    
-    
-
+  
     fetchData();
   }, [selectedDates, selectedSensorIds]);
+  
+  useEffect(() => {
+    // Log des valeurs après la mise à jour d'état
+    //console.log('AxX values:', chartData.flatMap((dataset) => dataset.data.map((point) => point.name)));
+    //console.log('AxY values:', chartData.flatMap((dataset) => dataset.data.map((point) => point[selectedSensorIds[0]]))); // Utilisez le premier sensorId comme exemple
+    //console.log('Data values:', chartData.flatMap((dataset) => dataset.data.map((point) => ({ name: point.name, ...point }))));
+  }, [chartData]);
 
   return (
     <div>
@@ -77,8 +76,8 @@ const ChartComponent = ({ selectedDates, selectedSensorIds }) => {
           }}
         >
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" tickFormatter={(tick) => moment(tick).format('DD/MM/YYYY HH:mm')} />
-          <YAxis />
+          <XAxis dataKey="name" tickFormatter={(tick) => moment(tick).format('yyyy/MM/DD HH:mm')} interval="preserveStartEnd" />
+          <YAxis domain={['dataMin', 'dataMax']} />
           <Tooltip />
           <Legend />
 
@@ -87,7 +86,8 @@ const ChartComponent = ({ selectedDates, selectedSensorIds }) => {
               key={sensorId}
               type="monotone"
               dataKey={sensorId}
-              stroke={`#${Math.floor(Math.random() * 16777215).toString(16)}`} // Random color
+              stackId="1"
+              stroke={`#${Math.floor(Math.random() * 16777215).toString(16)}`}
               activeDot={{ r: 8 }}
             />
           ))}

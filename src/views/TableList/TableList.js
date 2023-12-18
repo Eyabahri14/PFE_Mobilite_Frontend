@@ -6,6 +6,7 @@ import "moment/locale/fr";
 import ChartComponent from "./ChartComponent";
 import CalendarTable from "./CalendarTable";
 import "./App.css";
+import { FaPlus, FaTrash } from 'react-icons/fa';
 
 moment.locale("fr");
 
@@ -23,8 +24,7 @@ function App() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [capteurs, setCapteurs] = useState([]);
   const [loadingCapteurs, setLoadingCapteurs] = useState(true);
-  const [selectedSensorIds, setSelectedSensorIds] = useState([]);  // Initialize as an empty array
-
+  const [selectedSensorIds, setSelectedSensorIds] = useState([]);
   const [selectedDates, setSelectedDates] = useState([]);
 
   const handleSelectSlot = (slotInfo) => {
@@ -127,61 +127,70 @@ function App() {
       ) : (
         selectedDate && (
           <div>
-            <div className="form-group">
-              <br />
-              <h3 htmlFor="sensorSelect" className="MuiButton-label">
-                Sélectionnez l'ID du capteur:
-              </h3>
+  <div className="form-group d-flex align-items-center">
+    <h3 htmlFor="sensorSelect" className="MuiButton-label">
+      Sélectionnez l'ID du capteur:
+    </h3>
 
-
-
-              {selectedSensorIds.map((selectedSensorId, index) => (
-  <div key={index}>
-    <select
-      className="form-control"
-      value={selectedSensorId}
-      onChange={(e) => handleSensorSelect(e, index)}
-    >
-      {index === 0 && (
-        <option value="" disabled>
-          -- Choisissez un capteur --
-        </option>
-      )}
-      {capteurs.map((capteur) => (
-        <option key={capteur.id_capteur} value={capteur.id_capteur}>
-          {capteur.id_capteur}
-        </option>
-      ))}
-    </select>
-    <button onClick={() => handleRemoveSensor(index)}>Supprimer</button>
+    {selectedSensorIds.map((selectedSensorId, index) => (
+      <div key={index} className="d-flex align-items-center mb-2">
+        <select
+          className="form-control me-2"
+          value={selectedSensorId}
+          onChange={(e) => handleSensorSelect(e, index)}
+        >
+          {index === 0 && (
+            <option value="" disabled>
+              -- Choisissez un capteur --
+            </option>
+          )}
+          {capteurs.map((capteur) => (
+            <option key={capteur.id_capteur} value={capteur.id_capteur}>
+              {capteur.id_capteur}
+            </option>
+          ))}
+        </select>
+        <button
+          className="btn btn-secondary"
+          onClick={() => handleRemoveSensor(index)}
+        >
+          <FaTrash />
+        </button>
+      </div>
+    ))}
   </div>
-))}
 
+  <div>
+    <h3>Dates sélectionnées:</h3>
+    {selectedDates.map((date) => (
+      <div key={date} className="d-flex align-items-center mb-2">
+        <span>{date}</span>
+        <button
+          className="btn btn-secondary ms-2"
+          onClick={() => handleRemoveDate(date)}
+        >
+          <FaTrash />
+        </button>
+      </div>
+    ))}
+    <br />
+    <button className="btn btn-primary" onClick={handleAddDate}>
+      Ajouter une nouvelle date
+    </button>
 
+   <br/>
+    <button className="btn btn-success ms-2 " onClick={handleAddSensorId}>
+      <FaPlus />
+    </button>
+  </div>
 
-
-            </div>
-            <div>
-              <h3>Dates sélectionnées:</h3>
-              {selectedDates.map((date) => (
-                <div key={date}>
-                  {date}
-                  <button onClick={() => handleRemoveDate(date)}>Supprimer</button>
-                </div>
-              ))}
-              <button onClick={handleAddDate}>Ajouter une nouvelle date</button>
-            </div>
-
-            {/* Bouton circulaire pour ajouter un nouvel ID de capteur */}
-            <button className="add-sensor-button" onClick={handleAddSensorId}>
-              +
-            </button>
-
-            {selectedSensorIds.length > 0 && (
-              <ChartComponent selectedDates={formatSelectedDates()} selectedSensorIds={selectedSensorIds} />
-            )}
-            {selectedSensorIds.length > 0 && <CalendarTable selectedDates={formatSelectedDates()} selectedSensorIds={selectedSensorIds} />}
-          </div>
+  {selectedSensorIds.length > 0 && (
+    <ChartComponent selectedDates={formatSelectedDates()} selectedSensorIds={selectedSensorIds} />
+  )}
+  {selectedSensorIds.length > 0 && (
+    <CalendarTable selectedDates={formatSelectedDates()} selectedSensorIds={selectedSensorIds} />
+  )}
+</div>
         )
       )}
     </div>
