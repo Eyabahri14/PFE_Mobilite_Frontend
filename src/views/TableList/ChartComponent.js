@@ -1,100 +1,101 @@
 import React, { useEffect, useState } from 'react';
-import moment from 'moment';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { format } from 'date-fns';
+
+
+const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#413ea0']; 
+
+
+const CustomTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    const color = payload[0].color; 
+
+    return (
+      <div className={`custom-tooltip p-2 text-white`} style={{ backgroundColor: color, borderRadius: '0.25rem' }}>
+        <p className="mb-1">{`Capteur ID: ${data.sensorId.split('-')[1]}`}</p>
+        <p className="mb-1">{`Heure: ${data.name}`}</p>
+        <p className="mb-1">{`Valeur: ${data.valeur}`}</p>
+      </div>
+    );
+  }
+
+  return null;
+};
 
 const ChartComponent = ({ selectedDates, selectedSensorIds }) => {
   const [chartData, setChartData] = useState([]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const datasets = [];
-  
-        const datesQuery = selectedDates.map((date) => `Dates2=${date}`).join('&');
-        const sensorIdsQuery = selectedSensorIds.join(',');
-        const url = `http://localhost:3000/api/data/dashboard/${sensorIdsQuery}?${datesQuery}`;
-        console.log('url renvoyé par la requête', url);
-        const response = await fetch(url);
-        const data = await response.json();
-  
-    
-        // Assurez-vous que data est défini et est un tableau avant de le parcourir
-        if (Array.isArray(data)) {
-          data.forEach((entry) => {
-            const dateValue = new Date(`${entry.Hour}`);
-  
-            if (isNaN(dateValue.getTime())) {
-              console.error('Invalid date:', entry);
-              return null;
+        let combinedData = [];
+
+        for (const sensorId of selectedSensorIds) {
+          for (const date of selectedDates) {
+            const url = `http://localhost:3000/api/data/dashboard/${sensorId}?Dates2=${date}`;
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (Array.isArray(data)) {
+
+            const formattedData = data.map(entry => ({
+    name: `${String(entry.Hour).padStart(2, '0')}:${String(entry.Minute).padStart(2, '0')}`,
+    date: `${entry.Day}/${entry.Month}/${entry.Year} ${String(entry.Hour).padStart(2, '0')}:${String(entry.Minute).padStart(2, '0')}`,
+    valeur: entry.valeur,
+    sensorId: `sensor-${sensorId}-${date}`
+  }));
+               console.log(formattedData)
+              combinedData = [...combinedData, ...formattedData];
             }
-  
-            const formattedDate = format(dateValue, 'dd/MM/yyyy HH:mm');
-           // console.log('Formatted date:', formattedDate);
-  
-            datasets.push({
-              name: formattedDate,
-              [selectedSensorIds[0]]: entry.valeur,
-            });
-  
-            // Accédez aux valeurs spécifiques du premier élément du tableau (comme exemple)
-            //console.log(`Axe des X: ${formattedDate}`);
-            //console.log(`Axe des Y: ${entry.valeur}`);
-          });
-        } else {
-          console.error('Data is not an array:', data);
+          }
         }
-  
-        setChartData([{ sensorId: selectedSensorIds[0], data: datasets }]);
+
+        setChartData(combinedData);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
-  
+
     fetchData();
   }, [selectedDates, selectedSensorIds]);
   
-  useEffect(() => {
-    // Log des valeurs après la mise à jour d'état
-    //console.log('AxX values:', chartData.flatMap((dataset) => dataset.data.map((point) => point.name)));
-    //console.log('AxY values:', chartData.flatMap((dataset) => dataset.data.map((point) => point[selectedSensorIds[0]]))); // Utilisez le premier sensorId comme exemple
-    //console.log('Data values:', chartData.flatMap((dataset) => dataset.data.map((point) => ({ name: point.name, ...point }))));
-  }, [chartData]);
+const hours = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, '0')}:00`);
 
-  return (
-    <div>
-      <h2>Dashboard</h2>
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart
-          width={500}
-          height={300}
-          data={chartData.flatMap((dataset) => dataset.data)}
-          margin={{
-            top: 5,
-            right: 30,
-            left: 20,
-            bottom: 5,
-          }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" tickFormatter={(tick) => moment(tick).format('yyyy/MM/DD HH:mm')} interval="preserveStartEnd" />
-          <YAxis domain={['dataMin', 'dataMax']} />
-          <Tooltip />
-          <Legend />
+return (
+  <div>
+    <h2>Dashboard</h2>
+    <ResponsiveContainer width="100%" height={300}>
+      <LineChart
+        width={500}
+        height={300}
+        data={chartData}
+        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+      >
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="name" type="category" allowDuplicatedCategory={false} ticks={hours} />
+        <YAxis />
+        <Tooltip content={<CustomTooltip />} />
+        <Legend />
+        {selectedSensorIds.map((sensorId, index) => (
+  selectedDates.map((date, dateIndex) => {
+    const sensorDateId = `sensor-${sensorId}-${date}`;
+    return (
+      <Line
+        key={sensorDateId}
+        type="monotone"
+        dataKey="valeur"
+        data={chartData.filter(entry => entry.sensorId === sensorDateId)}
+        stroke={colors[(index + dateIndex) % colors.length]}
+        strokeWidth={3}
+      />
+    );
+  })
+))}
 
-          {selectedSensorIds.map((sensorId) => (
-            <Line
-              key={sensorId}
-              type="monotone"
-              dataKey={sensorId}
-              stackId="1"
-              stroke={`#${Math.floor(Math.random() * 16777215).toString(16)}`}
-              activeDot={{ r: 8 }}
-            />
-          ))}
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
-  );
+      </LineChart>
+    </ResponsiveContainer>
+  </div>
+);
 };
 
 export default ChartComponent;

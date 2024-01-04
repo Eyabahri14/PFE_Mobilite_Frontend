@@ -86,7 +86,7 @@ function App() {
   };
 
   // Définir la date par défaut sur janvier 2022
-  const defaultDate = moment("2022-01-01").toDate();
+  const defaultDate = moment("2018-01-01").toDate();
 
   useEffect(() => {
     const fetchCapteurs = async () => {
