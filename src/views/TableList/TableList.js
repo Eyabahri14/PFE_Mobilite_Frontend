@@ -126,11 +126,16 @@ function App() {
         <p>Loading capteurs...</p>
       ) : (
         selectedDate && (
-          <div>
-  <div className="form-group d-flex align-items-center">
-    <h3 htmlFor="sensorSelect" className="MuiButton-label">
-      Sélectionnez l'ID du capteur:
-    </h3>
+<div>
+  <div className="form-group">
+    <div className="d-flex align-items-center">
+      <h3 htmlFor="sensorSelect" className="MuiButton-label">
+        Sélectionnez l'ID du capteur:
+      </h3>
+      <button className="btn btn-success ms-2" onClick={handleAddSensorId}>
+        <FaPlus />
+      </button>
+    </div>
 
     {selectedSensorIds.map((selectedSensorId, index) => (
       <div key={index} className="d-flex align-items-center mb-2">
@@ -173,24 +178,27 @@ function App() {
         </button>
       </div>
     ))}
-    <br />
-    <button className="btn btn-primary" onClick={handleAddDate}>
-      Ajouter une nouvelle date
-    </button>
-
-   <br/>
-    <button className="btn btn-success ms-2 " onClick={handleAddSensorId}>
-      <FaPlus />
-    </button>
+    <div className="d-flex align-items-center mb-2">
+      <button className="btn btn-primary" onClick={handleAddDate}>
+        Ajouter une nouvelle date
+      </button>
+    </div>
   </div>
 
   {selectedSensorIds.length > 0 && (
-    <ChartComponent selectedDates={formatSelectedDates()} selectedSensorIds={selectedSensorIds} />
-  )}
-  {selectedSensorIds.length > 0 && (
-    <CalendarTable selectedDates={formatSelectedDates()} selectedSensorIds={selectedSensorIds} />
+    <>
+      <ChartComponent
+        selectedDates={formatSelectedDates()}
+        selectedSensorIds={selectedSensorIds}
+      />
+      <CalendarTable
+        selectedDates={formatSelectedDates()}
+        selectedSensorIds={selectedSensorIds}
+      />
+    </>
   )}
 </div>
+
         )
       )}
     </div>

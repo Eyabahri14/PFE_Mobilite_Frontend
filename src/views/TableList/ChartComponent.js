@@ -21,7 +21,7 @@ const ChartComponent = ({ selectedDates, selectedSensorIds }) => {
         // Assurez-vous que data est défini et est un tableau avant de le parcourir
         if (Array.isArray(data)) {
           data.forEach((entry) => {
-            const dateValue = new Date(`${entry.Year}-${entry.Month}-${entry.Day} ${entry.Hour}:${entry.Minute}`);
+            const dateValue = new Date(`${entry.Hour}`);
   
             if (isNaN(dateValue.getTime())) {
               console.error('Invalid date:', entry);
