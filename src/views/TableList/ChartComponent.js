@@ -7,14 +7,15 @@ const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#413ea0'];
 
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    const color = payload[0].color; 
-
     return (
-      <div className={`custom-tooltip p-2 text-white`} style={{ backgroundColor: color, borderRadius: '0.25rem' }}>
-        <p className="mb-1">{`Capteur ID: ${data.sensorId.split('-')[1]}`}</p>
-        <p className="mb-1">{`Heure: ${data.name}`}</p>
-        <p className="mb-1">{`Valeur: ${data.valeur}`}</p>
+      <div className="custom-tooltip p-2" style={{ backgroundColor: 'white', borderRadius: '0.25rem', boxShadow: '0px 0px 5px 0px rgba(0,0,0,0.3)' }}>
+        {payload.map((data, index) => (
+          <div key={index} style={{ color: data.color }}>
+            <p className="mb-1">{`Capteur ID: ${data.payload.sensorId.split('-')[1]}`}</p>
+            <p className="mb-1">{`Heure: ${data.payload.name}`}</p>
+            <p className="mb-1">{`Valeur: ${data.payload.valeur}`}</p>
+          </div>
+        ))}
       </div>
     );
   }
