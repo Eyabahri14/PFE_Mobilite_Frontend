@@ -191,10 +191,11 @@ function App() {
         selectedDates={formatSelectedDates()}
         selectedSensorIds={selectedSensorIds}
       />
-      <CalendarTable
-        selectedDates={formatSelectedDates()}
-        selectedSensorIds={selectedSensorIds}
-      />
+     <CalendarTable
+  selectedDates={formatSelectedDates()}
+  selectedSensorIds={selectedSensorIds}
+/>
+
     </>
   )}
 </div>

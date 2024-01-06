@@ -16,6 +16,8 @@
     "classnames": "2.3.1",
     "date-fns": "^2.30.0",
     "history": "5.0.0",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.1",
     "leaflet": "^1.9.4",
     "leaflet-control-geocoder": "^2.4.0",
     "leaflet-routing-machine": "^3.2.12",
