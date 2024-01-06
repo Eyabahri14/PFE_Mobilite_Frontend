@@ -6,7 +6,8 @@ import "moment/locale/fr";
 import ChartComponent from "./ChartComponent";
 import CalendarTable from "./CalendarTable";
 import "./App.css";
-import { FaPlus, FaTrash } from 'react-icons/fa';
+import { FaPlus, FaTrash } from "react-icons/fa";
+import BarChartComponent from "./BarChart";
 
 moment.locale("fr");
 
@@ -29,7 +30,10 @@ function App() {
 
   const handleSelectSlot = (slotInfo) => {
     setSelectedDate(slotInfo.start);
-    setSelectedDates([...selectedDates, moment(slotInfo.start).format("YYYY-MM-DD")]);
+    setSelectedDates([
+      ...selectedDates,
+      moment(slotInfo.start).format("YYYY-MM-DD"),
+    ]);
     console.log("Selected Date:", slotInfo.start);
   };
 
@@ -40,7 +44,7 @@ function App() {
 
   const handleSensorSelect = (e, index) => {
     const selectedSensorId = e.target.value;
-    setSelectedSensorIds(prevSensorIds => {
+    setSelectedSensorIds((prevSensorIds) => {
       const newSelectedSensorIds = [...prevSensorIds];
       newSelectedSensorIds[index] = selectedSensorId;
       console.log("Selected Sensor IDs:", newSelectedSensorIds);
@@ -48,15 +52,13 @@ function App() {
     });
   };
 
-
-
-
   const formatSelectedDates = () => {
     return selectedDates.map((date) => moment(date).format("YYYY-MM-DD"));
   };
 
   const slotPropGetter = (date) => {
-    const isSelected = selectedDate && moment(date).isSame(moment(selectedDate), "day");
+    const isSelected =
+      selectedDate && moment(date).isSame(moment(selectedDate), "day");
     return {
       className: isSelected ? "rbc-day-slot selected-day" : "rbc-day-slot",
     };
@@ -65,14 +67,15 @@ function App() {
   const handleAddSensorId = () => {
     // Check if there are available sensor IDs not already selected
     const availableSensorIds = capteurs.map((capteur) => capteur.id_capteur);
-    const newSensorIds = availableSensorIds.filter((id) => !selectedSensorIds.includes(id));
+    const newSensorIds = availableSensorIds.filter(
+      (id) => !selectedSensorIds.includes(id)
+    );
 
     // If there are available sensor IDs, add the first one to selectedSensorIds
     if (newSensorIds.length > 0) {
       setSelectedSensorIds([...selectedSensorIds, newSensorIds[0]]);
     }
   };
-
 
   const handleRemoveDate = (dateToRemove) => {
     const updatedDates = selectedDates.filter((date) => date !== dateToRemove);
@@ -106,7 +109,7 @@ function App() {
 
   return (
     <div className="App">
-      <Calendar
+    <Calendar
         selectable
         localizer={localizer}
         events={events}
@@ -120,88 +123,95 @@ function App() {
         onSelectSlot={handleSelectSlot}
         messages={messages}
         slotPropGetter={slotPropGetter}
-      />
+      /> 
 
       {loadingCapteurs ? (
         <p>Loading capteurs...</p>
       ) : (
         selectedDate && (
-<div>
-  <div className="form-group">
-    <div className="d-flex align-items-center">
-      <h3 htmlFor="sensorSelect" className="MuiButton-label">
-        Sélectionnez l'ID du capteur:
-      </h3>
-      <button className="btn btn-success ms-2" onClick={handleAddSensorId}>
-        <FaPlus />
-      </button>
-    </div>
+          <div>
+            <div className="form-group">
+              <div className="d-flex align-items-center">
+                <h3 htmlFor="sensorSelect" className="MuiButton-label">
+                  Sélectionnez l'ID du capteur:
+                </h3>
+                <button
+                  className="btn btn-success ms-2"
+                  onClick={handleAddSensorId}
+                >
+                  <FaPlus />
+                </button>
+              </div>
 
-    {selectedSensorIds.map((selectedSensorId, index) => (
-      <div key={index} className="d-flex align-items-center mb-2">
-        <select
-          className="form-control me-2"
-          value={selectedSensorId}
-          onChange={(e) => handleSensorSelect(e, index)}
-        >
-          {index === 0 && (
-            <option value="" disabled>
-              -- Choisissez un capteur --
-            </option>
-          )}
-          {capteurs.map((capteur) => (
-            <option key={capteur.id_capteur} value={capteur.id_capteur}>
-              {capteur.id_capteur}
-            </option>
-          ))}
-        </select>
-        <button
-          className="btn btn-secondary"
-          onClick={() => handleRemoveSensor(index)}
-        >
-          <FaTrash />
-        </button>
-      </div>
-    ))}
-  </div>
+              {selectedSensorIds.map((selectedSensorId, index) => (
+                <div key={index} className="d-flex align-items-center mb-2">
+                  <select
+                    className="form-control me-2"
+                    value={selectedSensorId}
+                    onChange={(e) => handleSensorSelect(e, index)}
+                  >
+                    {index === 0 && (
+                      <option value="" disabled>
+                        -- Choisissez un capteur --
+                      </option>
+                    )}
+                    {capteurs.map((capteur) => (
+                      <option
+                        key={capteur.id_capteur}
+                        value={capteur.id_capteur}
+                      >
+                        {capteur.id_capteur}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => handleRemoveSensor(index)}
+                  >
+                    <FaTrash />
+                  </button>
+                </div>
+              ))}
+            </div>
 
-  <div>
-    <h3>Dates sélectionnées:</h3>
-    {selectedDates.map((date) => (
-      <div key={date} className="d-flex align-items-center mb-2">
-        <span>{date}</span>
-        <button
-          className="btn btn-secondary ms-2"
-          onClick={() => handleRemoveDate(date)}
-        >
-          <FaTrash />
-        </button>
-      </div>
-    ))}
-    <div className="d-flex align-items-center mb-2">
-      <button className="btn btn-primary" onClick={handleAddDate}>
-        Ajouter une nouvelle date
-      </button>
-    </div>
-  </div>
+            <div>
+              <h3>Dates sélectionnées:</h3>
+              {selectedDates.map((date) => (
+                <div key={date} className="d-flex align-items-center mb-2">
+                  <span>{date}</span>
+                  <button
+                    className="btn btn-secondary ms-2"
+                    onClick={() => handleRemoveDate(date)}
+                  >
+                    <FaTrash />
+                  </button>
+                </div>
+              ))}
+              <div className="d-flex align-items-center mb-2">
+                <button className="btn btn-primary" onClick={handleAddDate}>
+                  Ajouter une nouvelle date
+                </button>
+              </div>
+            </div>
 
-  {selectedSensorIds.length > 0 && (
-    <>
-      <ChartComponent
-        selectedDates={formatSelectedDates()}
-        selectedSensorIds={selectedSensorIds}
-      />
-     <CalendarTable
-  selectedDates={formatSelectedDates()}
-  selectedSensorIds={selectedSensorIds}
-/>
-
-    </>
-  )}
-</div>
-
+            {/* {selectedSensorIds.length > 0 && (
+              <>
+                <ChartComponent
+                  selectedDates={formatSelectedDates()}
+                  selectedSensorIds={selectedSensorIds}
+                />
+                <CalendarTable
+                  selectedDates={formatSelectedDates()}
+                  selectedSensorIds={selectedSensorIds}
+                />
+              </>
+            )} */}
+          </div>
         )
       )}
+
+      <BarChartComponent  
+                  selectedSensorIds={selectedSensorIds}/>
     </div>
   );
 }
