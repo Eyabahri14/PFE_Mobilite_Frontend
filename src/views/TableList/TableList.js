@@ -8,6 +8,7 @@ import CalendarTable from "./CalendarTable";
 import "./App.css";
 import { FaPlus, FaTrash } from "react-icons/fa";
 import BarChartComponent from "./BarChart";
+import HebdomadaireTable from "./HebdomadaireTable";
 
 moment.locale("fr");
 
@@ -27,6 +28,9 @@ function App() {
   const [loadingCapteurs, setLoadingCapteurs] = useState(true);
   const [selectedSensorIds, setSelectedSensorIds] = useState([]);
   const [selectedDates, setSelectedDates] = useState([]);
+  const [selectedWeeks, setSelectedWeeks] = useState([]);
+
+
 
   const handleSelectSlot = (slotInfo) => {
     setSelectedDate(slotInfo.start);
@@ -36,6 +40,11 @@ function App() {
     ]);
     console.log("Selected Date:", slotInfo.start);
   };
+
+  const handleWeeksChange = (weeks) => {
+    setSelectedWeeks(weeks);
+  };
+
 
   const handleAddDate = () => {
     const newDate = moment().add(1, "days").format("YYYY-MM-DD");
@@ -194,7 +203,7 @@ function App() {
               </div>
             </div>
 
-            {/* {selectedSensorIds.length > 0 && (
+             {selectedSensorIds.length > 0 && (
               <>
                 <ChartComponent
                   selectedDates={formatSelectedDates()}
@@ -205,13 +214,20 @@ function App() {
                   selectedSensorIds={selectedSensorIds}
                 />
               </>
-            )} */}
+            )} 
           </div>
         )
       )}
 
-      <BarChartComponent  
-                  selectedSensorIds={selectedSensorIds}/>
+    <BarChartComponent
+      selectedSensorIds={selectedSensorIds}
+      onWeeksChange={handleWeeksChange} 
+    />
+    
+    <HebdomadaireTable
+  selectedSensorIds={selectedSensorIds}
+  weeks={selectedWeeks}
+/>
     </div>
   );
 }

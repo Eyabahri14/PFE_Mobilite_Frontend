@@ -10,18 +10,15 @@ import {
   ResponsiveContainer,
 
 } from "recharts";
-import {
-
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-} from "@mui/material";
+import { FormControl, InputLabel, MenuItem, Select, Box } from "@mui/material";
 
 
-function BarChartComponent({ selectedSensorIds }) {
-  const [res, setRes] = useState([]);
+
+function BarChartComponent({ selectedSensorIds, onWeeksChange }) {
   const [weeks, setWeeks] = useState([1]);
+
+  const [res, setRes] = useState([]);
+
 
   useEffect(() => {
     const fetchCapteurs = async () => {
@@ -31,23 +28,27 @@ function BarChartComponent({ selectedSensorIds }) {
         );
         const data = await response.json();
         setRes(data);
+        
       } catch (error) {
         console.error("Error fetching capteurs", error);
       }
     };
 
     fetchCapteurs();
-  }, [weeks, selectedSensorIds]);
 
+    onWeeksChange(weeks);
+
+  }, [weeks, selectedSensorIds, onWeeksChange]);
+  
   const formattedData = res.map((entry) => ({
     id_capteur: entry.id_capteur,
     DayOfWeek: entry.dayOfWeek,
     TotalValeur: entry.totalValues,
-    WeekNumber: entry.weekNumber, // Include week number in the formatted data
+    WeekNumber: entry.weekNumber, 
   }));
 
   const filteredData = formattedData.filter((entry) => {
-    return weeks.includes(parseInt(entry.WeekNumber, 10)); // Filter by selected weeks
+    return weeks.includes(parseInt(entry.WeekNumber, 10)); 
   });
 
   const transformedData = filteredData.reduce((acc, entry) => {
@@ -61,22 +62,31 @@ function BarChartComponent({ selectedSensorIds }) {
 
   return (
     <div>
-      <FormControl fullWidth>
-        <InputLabel id="week-label">Select Week(s)</InputLabel>
-        <Select
-          labelId="week-label"
-          id="week-select"
-          multiple
-          value={weeks}
-          onChange={(e) => setWeeks(e.target.value)}
-        >
-          {Array.from({ length: 48 }, (_, index) => index + 1).map((option) => (
-            <MenuItem key={option} value={option}>
-              Week {option}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <h2 style={{ textAlign: 'center', margin: '20px 0' }}>Histogrammes Hebdomadaires</h2>
+      
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '20px' }}>
+        <FormControl sx={{ minWidth: 240 }} size="small">
+          <InputLabel id="week-label">Choisis les semaines à afficher :</InputLabel>
+          <Select
+            labelId="week-label"
+            id="week-select"
+            multiple
+            value={weeks}
+            onChange={(e) => setWeeks(e.target.value)}
+          >
+            {Array.from({ length: 48 }, (_, index) => index + 1).map((option) => (
+              <MenuItem key={option} value={option}>
+                Semaine {option}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
+
+
+
+      <div style={{ marginTop: '20px' }}> 
+
 
       <ResponsiveContainer width="100%" height={400}>
         <BarChart
@@ -106,6 +116,7 @@ function BarChartComponent({ selectedSensorIds }) {
           ))}
         </BarChart>
       </ResponsiveContainer>
+      </div>
     </div>
   );
 }
