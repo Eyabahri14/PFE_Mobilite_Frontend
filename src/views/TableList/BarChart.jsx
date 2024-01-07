@@ -8,17 +8,26 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+
 } from "recharts";
+import {
+
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+} from "@mui/material";
+
 
 function BarChartComponent({ selectedSensorIds }) {
   const [res, setRes] = useState([]);
-  const [week, setWeek] = useState(1); // Default to the first week
+  const [weeks, setWeeks] = useState([1]);
 
   useEffect(() => {
     const fetchCapteurs = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/data/weeklyData/${selectedSensorIds}?weeks=${week}`
+          `http://localhost:3000/api/data/weeklyData/${selectedSensorIds}?weeks=${weeks.join(",")}`
         );
         const data = await response.json();
         setRes(data);
@@ -28,52 +37,46 @@ function BarChartComponent({ selectedSensorIds }) {
     };
 
     fetchCapteurs();
-  }, [week, selectedSensorIds]); // Include 'week' and 'selectedSensorIds' in the dependencies array
+  }, [weeks, selectedSensorIds]);
 
   const formattedData = res.map((entry) => ({
     id_capteur: entry.id_capteur,
     DayOfWeek: entry.dayOfWeek,
     TotalValeur: entry.totalValues,
+    WeekNumber: entry.weekNumber, // Include week number in the formatted data
   }));
 
   const filteredData = formattedData.filter((entry) => {
-    // Ensure you have the correct days of the week to display in your chart
-    const daysOfWeek = [
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-      "Sunday",
-    ];
-
-    // Only include entries for the selected days of the week
-    return daysOfWeek.includes(entry.DayOfWeek);
+    return weeks.includes(parseInt(entry.WeekNumber, 10)); // Filter by selected weeks
   });
 
-  // Transform data to create separate entries for each sensor and include days of the week
   const transformedData = filteredData.reduce((acc, entry) => {
-    const dayOfWeekKey = entry.DayOfWeek.toLowerCase(); // Convert to lowercase to match the XAxis labels
+    const dayOfWeekKey = entry.DayOfWeek.toLowerCase();
     if (!acc[dayOfWeekKey]) {
       acc[dayOfWeekKey] = { DayOfWeek: entry.DayOfWeek };
     }
-    acc[dayOfWeekKey][`TotalValeur_${entry.id_capteur}`] = entry.TotalValeur;
+    acc[dayOfWeekKey][`TotalValeur_${entry.id_capteur}_${entry.WeekNumber}`] = entry.TotalValeur;
     return acc;
   }, {});
 
   return (
     <div>
-      <select
-        value={week}
-        onChange={(e) => setWeek(parseInt(e.target.value))}
-      >
-        {Array.from({ length: 48 }, (_, index) => index + 1).map((option) => (
-          <option key={option} value={option}>
-            Week {option}
-          </option>
-        ))}
-      </select>
+      <FormControl fullWidth>
+        <InputLabel id="week-label">Select Week(s)</InputLabel>
+        <Select
+          labelId="week-label"
+          id="week-select"
+          multiple
+          value={weeks}
+          onChange={(e) => setWeeks(e.target.value)}
+        >
+          {Array.from({ length: 48 }, (_, index) => index + 1).map((option) => (
+            <MenuItem key={option} value={option}>
+              Week {option}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
 
       <ResponsiveContainer width="100%" height={400}>
         <BarChart
@@ -93,11 +96,13 @@ function BarChartComponent({ selectedSensorIds }) {
           <Tooltip />
           <Legend />
           {selectedSensorIds.map((sensorId) => (
-            <Bar
-              key={sensorId}
-              dataKey={`TotalValeur_${sensorId}`}
-              fill={`#${Math.floor(Math.random() * 16777215).toString(16)}`} // Random color for each sensor
-            />
+            weeks.map((week) => (
+              <Bar
+                key={`${sensorId}_${week}`}
+                dataKey={`TotalValeur_${sensorId}_${week}`}
+                fill={`#${Math.floor(Math.random() * 16777215).toString(16)}`}
+              />
+            ))
           ))}
         </BarChart>
       </ResponsiveContainer>
