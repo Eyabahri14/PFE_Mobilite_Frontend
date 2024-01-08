@@ -34,12 +34,16 @@ function App() {
 
   const handleSelectSlot = (slotInfo) => {
     setSelectedDate(slotInfo.start);
-    setSelectedDates([
+    const newSelectedDates = [
       ...selectedDates,
       moment(slotInfo.start).format("YYYY-MM-DD"),
-    ]);
-    console.log("Selected Date:", slotInfo.start);
+    ];
+    setSelectedDates(newSelectedDates);
+  
+    // Store the dates in localStorage
+    localStorage.setItem('selectedDates', JSON.stringify(newSelectedDates));
   };
+  
 
   const handleWeeksChange = (weeks) => {
     setSelectedWeeks(weeks);

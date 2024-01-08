@@ -28,70 +28,55 @@ function calculateColor(value, minValue, maxValue) {
 }
 
 const Maps = () => {
-  const [mesures, setMesures] = useState([]);
-  const [capteurs, setCapteurs] = useState([]);
+  const [data, setData] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/data/mesure')
-      .then(response => response.json())
-      .then(data => setMesures(data));
+    const storedDates = JSON.parse(localStorage.getItem('selectedDates'));
 
-    fetch('http://localhost:3000/api/data/capteur')
-      .then(response => response.json())
-      .then(data => setCapteurs(data));
+    if (storedDates && storedDates.length > 0) {
+      const datesQueryString = storedDates.join(',');
+      fetch(`http://localhost:3000/api/data/capteursParDate?dates=${datesQueryString}`)
+        .then(response => response.json())
+        .then(fetchedData => {
+          setData(fetchedData.map(item => ({
+            ...item,
+            value: item.TotalValeur
+          })));
+        })
+        .catch(error => console.error('Error fetching data:', error));
+    } else {
+      Promise.all([
+        fetch('http://localhost:3000/api/data/capteur').then(res => res.json()),
+        fetch('http://localhost:3000/api/data/mesure').then(res => res.json())
+      ]).then(([capteurs, mesures]) => {
+        const combinedData = capteurs.map(capteur => {
+          const mesure = mesures.find(m => m.id_capteur === capteur.id_capteur);
+          return {
+            ...capteur,
+            value: mesure ? mesure.valeur : 0
+          };
+        });
+        setData(combinedData);
+      }).catch(error => console.error('Error fetching default data:', error));
+    }
   }, []);
 
   useEffect(() => {
-    if (!mesures.length || !capteurs.length) return;
+    if (!data.length) return;
 
     const map = L.map("map").setView([47.312666, 5.041106], 13);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: `&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors`,
     }).addTo(map);
 
-    const markers = L.markerClusterGroup({
-      iconCreateFunction: function (cluster) {
-        const markersInCluster = cluster.getAllChildMarkers();
-        let sum = 0;
-        let minValue = Number.MAX_VALUE;
-        let maxValue = Number.MIN_VALUE;
+    const markers = L.markerClusterGroup();
 
-        markersInCluster.forEach((marker) => {
-          const counterId = marker.options.counterId;
-          const mesure = mesures.find((m) => m.id_capteur === counterId);
-          if (mesure) {
-            sum += mesure.valeur;
-            minValue = Math.min(minValue, mesure.valeur);
-            maxValue = Math.max(maxValue, mesure.valeur);
-          }
-        });
-
-        return L.divIcon({
-          html: `${sum} nb/v/h`,
-          iconSize: [36, 36],
-          iconAnchor: [18, 18],
-          className: "custom-cluster-icon",
-          style: `background-color: ${calculateColor(sum, minValue, maxValue)};`,
-        });
-      },
-    });
-
-    const clusterHeatData = [];
-
-    capteurs.forEach((capteur) => {
-      const marker = L.marker([capteur.Capteur_lat, capteur.Capteur_long]);
-      marker.options.counterId = capteur.id_capteur;
-      const mesure = mesures.find((m) => m.id_capteur === capteur.id_capteur);
-      if (mesure) {
-        marker.bindPopup(`<b>${capteur.Station_point_de_depart}</b><br>Valeur : ${mesure.valeur} nb/v/h`);
-        clusterHeatData.push([capteur.Capteur_lat, capteur.Capteur_long, mesure.valeur]);
-      } else {
-        marker.bindPopup(`<b>${capteur.Station_point_de_depart}</b><br>Pas de mesure disponible`);
-      }
+    data.forEach(item => {
+      const marker = L.marker([item.Capteur_lat, item.Capteur_long], { icon: DefaultIcon });
+      marker.bindPopup(`<b>${item.Station_point_de_depart}</b><br>Valeur : ${item.value}`);
       markers.addLayer(marker);
     });
 
-    L.heatLayer(clusterHeatData, { radius: 25 }).addTo(markers);
     map.addLayer(markers);
 
     L.Routing.control({
@@ -103,15 +88,12 @@ const Maps = () => {
       fitSelectedRoutes: true,
     }).addTo(map);
 
-  }, [mesures, capteurs]);
+  }, [data]);
 
   return <div id="map" style={{ height: "1000px" }}></div>;
 };
 
 export default Maps;
-
-
-
 
 
 
