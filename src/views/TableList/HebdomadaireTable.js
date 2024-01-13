@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './CalendarTable.css'; // Réutiliser le même fichier CSS
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { FaFilePdf } from 'react-icons/fa';
+import { FaFilePdf, FaFileCsv } from 'react-icons/fa';
 
 const HebdomadaireTable = ({ selectedSensorIds, weeks }) => {
   const [tableData, setTableData] = useState([]);
@@ -33,6 +33,33 @@ const HebdomadaireTable = ({ selectedSensorIds, weeks }) => {
     doc.save(`weekly_table_data_${new Date().getTime()}.pdf`);
   };
 
+  const exportCSV = () => {
+    const csvRows = [];
+    const headers = ["Capteur", "Valeur", "WeekNumber", "Station Point de Depart", "Station Direction"];
+    csvRows.push(headers.join(","));
+
+    tableData.forEach(entry => {
+      const row = [
+        entry.capteur,
+        entry.sumValeur,
+        entry.weekNumber,
+        entry.stationPointDeDepart,
+        entry.stationDirection,
+      ];
+      csvRows.push(row.join(","));
+    });
+
+    const csvContent = csvRows.join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.setAttribute("hidden", "");
+    a.setAttribute("href", url);
+    a.setAttribute("download", `weekly_table_data_${new Date().getTime()}.csv`);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -60,6 +87,15 @@ const HebdomadaireTable = ({ selectedSensorIds, weeks }) => {
 
   return (
     <div>
+
+<div className="btn-group mb-3">
+        <button className="btn btn-danger" onClick={exportPDF}>
+          <FaFilePdf /> Export to PDF
+        </button>
+        <button className="btn btn-primary ml-2" onClick={exportCSV}>
+          <FaFileCsv /> Export to CSV
+        </button>
+      </div>
       {tableData.length > 0 ? (
         <div>
           <table className="styled-table">

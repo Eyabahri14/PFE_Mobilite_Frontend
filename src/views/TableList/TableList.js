@@ -30,7 +30,11 @@ function App() {
   const [selectedDates, setSelectedDates] = useState([]);
   const [selectedWeeks, setSelectedWeeks] = useState([]);
 
-
+  const handleResetMaps = () => {
+    localStorage.clear();
+    setSelectedDates([]);
+    setSelectedSensorIds([]);
+  };
 
   const handleSelectSlot = (slotInfo) => {
     setSelectedDate(slotInfo.start);
@@ -40,7 +44,6 @@ function App() {
     ];
     setSelectedDates(newSelectedDates);
   
-    // Store the dates in localStorage
     localStorage.setItem('selectedDates', JSON.stringify(newSelectedDates));
   };
   
@@ -57,13 +60,15 @@ function App() {
 
   const handleSensorSelect = (e, index) => {
     const selectedSensorId = e.target.value;
-    setSelectedSensorIds((prevSensorIds) => {
+    setSelectedSensorIds(prevSensorIds => {
       const newSelectedSensorIds = [...prevSensorIds];
       newSelectedSensorIds[index] = selectedSensorId;
       console.log("Selected Sensor IDs:", newSelectedSensorIds);
+      // Removed the call to fetchDataForSensors
       return newSelectedSensorIds;
     });
   };
+  
 
   const formatSelectedDates = () => {
     return selectedDates.map((date) => moment(date).format("YYYY-MM-DD"));
@@ -104,7 +109,9 @@ function App() {
   // Définir la date par défaut sur janvier 2022
   const defaultDate = moment("2018-01-01").toDate();
 
+
   useEffect(() => {
+    // Fetch capteurs data on component mount
     const fetchCapteurs = async () => {
       try {
         const response = await fetch("http://localhost:3000/api/data/capteur");
@@ -120,108 +127,108 @@ function App() {
     fetchCapteurs();
   }, []);
 
+
   return (
-    <div className="App">
+  <div className="App">
+       <button className="btn btn-danger mb-3" onClick={handleResetMaps}>
+        Réinitialiser le Maps
+      </button>
     <Calendar
-        selectable
-        localizer={localizer}
-        events={events}
-        startAccessor="start"
-        endAccessor="end"
-        style={{ height: 500 }}
-        views={["month"]}
-        step={60}
-        showMultiDayTimes
-        defaultDate={defaultDate}
-        onSelectSlot={handleSelectSlot}
-        messages={messages}
-        slotPropGetter={slotPropGetter}
-      /> 
+      selectable
+      localizer={localizer}
+      events={events}
+      startAccessor="start"
+      endAccessor="end"
+      style={{ height: 500 }}
+      views={["month"]}
+      step={60}
+      showMultiDayTimes
+      defaultDate={defaultDate}
+      onSelectSlot={handleSelectSlot}
+      messages={messages}
+      slotPropGetter={slotPropGetter}
+    />
 
-      {loadingCapteurs ? (
-        <p>Loading capteurs...</p>
-      ) : (
-        selectedDate && (
-          <div>
-            <div className="form-group">
-              <div className="d-flex align-items-center">
-                <h3 htmlFor="sensorSelect" className="MuiButton-label">
-                  Sélectionnez l'ID du capteur:
-                </h3>
-                <button
-                  className="btn btn-success ms-2"
-                  onClick={handleAddSensorId}
+    {loadingCapteurs ? (
+      <p>Loading capteurs...</p>
+    ) : (
+      <div>
+      <div className="form-group mt-4 mb-4">
+        <div className="d-flex align-items-center mb-3">
+          <span className="text-label mr-3">Sélectionnez l'ID du capteur:</span>
+          <button
+            className="btn btn-success mr-3"
+            onClick={handleAddSensorId}
+          >
+            <FaPlus />
+          </button>
+        </div>
+    
+        {selectedSensorIds.map((selectedSensorId, index) => (
+          <div key={index} className="d-flex align-items-center mb-3">
+            <select
+              className="form-control mr-3"
+              value={selectedSensorId}
+              onChange={(e) => handleSensorSelect(e, index)}
+              style={{ flex: 1 }}
+            >
+              {index === 0 && (
+                <option value="" disabled>
+                  -- Choisissez un capteur --
+                </option>
+              )}
+              {capteurs.map((capteur) => (
+                <option
+                  key={capteur.id_capteur}
+                  value={capteur.id_capteur}
                 >
-                  <FaPlus />
-                </button>
-              </div>
-
-              {selectedSensorIds.map((selectedSensorId, index) => (
-                <div key={index} className="d-flex align-items-center mb-2">
-                  <select
-                    className="form-control me-2"
-                    value={selectedSensorId}
-                    onChange={(e) => handleSensorSelect(e, index)}
-                  >
-                    {index === 0 && (
-                      <option value="" disabled>
-                        -- Choisissez un capteur --
-                      </option>
-                    )}
-                    {capteurs.map((capteur) => (
-                      <option
-                        key={capteur.id_capteur}
-                        value={capteur.id_capteur}
-                      >
-                        {capteur.id_capteur}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    className="btn btn-secondary"
-                    onClick={() => handleRemoveSensor(index)}
-                  >
-                    <FaTrash />
-                  </button>
-                </div>
+                  {capteur.id_capteur}
+                </option>
               ))}
-            </div>
-
-            <div>
-              <h3>Dates sélectionnées:</h3>
-              {selectedDates.map((date) => (
-                <div key={date} className="d-flex align-items-center mb-2">
-                  <span>{date}</span>
-                  <button
-                    className="btn btn-secondary ms-2"
-                    onClick={() => handleRemoveDate(date)}
-                  >
-                    <FaTrash />
-                  </button>
-                </div>
-              ))}
-              <div className="d-flex align-items-center mb-2">
-                <button className="btn btn-primary" onClick={handleAddDate}>
-                  Ajouter une nouvelle date
-                </button>
-              </div>
-            </div>
-
-             {selectedSensorIds.length > 0 && (
-              <>
-                <ChartComponent
-                  selectedDates={formatSelectedDates()}
-                  selectedSensorIds={selectedSensorIds}
-                />
-                <CalendarTable
-                  selectedDates={formatSelectedDates()}
-                  selectedSensorIds={selectedSensorIds}
-                />
-              </>
-            )} 
+            </select>
+            <button
+              className="btn btn-secondary"
+              onClick={() => handleRemoveSensor(index)}
+            >
+              <FaTrash />
+            </button>
           </div>
-        )
+        ))}
+      </div>
+    
+      <div className="date-selection mb-4">
+        <span className="text-label mb-2 d-block">Dates sélectionnées:</span>
+        {selectedDates.map((date) => (
+          <div key={date} className="d-flex align-items-center mb-3">
+            <span className="mr-3">{date}</span>
+            <button
+              className="btn btn-secondary"
+              onClick={() => handleRemoveDate(date)}
+            >
+              <FaTrash />
+            </button>
+          </div>
+        ))}
+        <button className="btn btn-primary mt-2" onClick={handleAddDate}>
+          Ajouter une nouvelle date
+        </button>
+      </div>
+    
+      {selectedSensorIds.length > 0 && (
+        <>
+          <ChartComponent
+            selectedDates={formatSelectedDates()}
+            selectedSensorIds={selectedSensorIds}
+          />
+          <CalendarTable
+            selectedDates={formatSelectedDates()}
+            selectedSensorIds={selectedSensorIds}
+          />
+        </>
       )}
+    </div>
+    
+    )}
 
     <BarChartComponent
       selectedSensorIds={selectedSensorIds}
@@ -229,11 +236,12 @@ function App() {
     />
     
     <HebdomadaireTable
-  selectedSensorIds={selectedSensorIds}
-  weeks={selectedWeeks}
-/>
-    </div>
-  );
+      selectedSensorIds={selectedSensorIds}
+      weeks={selectedWeeks}
+    />
+  </div>
+);
+
 }
 
 export default App;

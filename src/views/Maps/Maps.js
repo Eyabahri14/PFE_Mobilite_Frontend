@@ -41,6 +41,7 @@ const Maps = () => {
           setData(fetchedData.map(item => ({
             ...item,
             value: item.TotalValeur
+       
           })));
         })
         .catch(error => console.error('Error fetching data:', error));
@@ -71,11 +72,16 @@ const Maps = () => {
 
     const markers = L.markerClusterGroup();
 
+  
+
     data.forEach(item => {
       const marker = L.marker([item.Capteur_lat, item.Capteur_long], { icon: DefaultIcon });
       marker.bindPopup(`<b>${item.Station_point_de_depart}</b><br>Valeur : ${item.value}`);
+      console.log("valeur",item.value)
       markers.addLayer(marker);
     });
+
+
 
     map.addLayer(markers);
 

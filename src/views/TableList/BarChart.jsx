@@ -11,7 +11,9 @@ import {
 
 } from "recharts";
 import { FormControl, InputLabel, MenuItem, Select, Box } from "@mui/material";
-
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import { FaPrint, FaFilePdf } from 'react-icons/fa'; 
 
 
 function BarChartComponent({ selectedSensorIds, onWeeksChange }) {
@@ -19,7 +21,33 @@ function BarChartComponent({ selectedSensorIds, onWeeksChange }) {
 
   const [res, setRes] = useState([]);
 
-
+  const exportToPdf = () => {
+    const svgElement = document.querySelector('.recharts-surface');
+    if (!svgElement) return;
+  
+    const svgString = new XMLSerializer().serializeToString(svgElement);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const DOMURL = window.URL || window.webkitURL || window;
+    const img = new Image();
+    const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+    const url = DOMURL.createObjectURL(svgBlob);
+  
+    img.onload = () => {
+      canvas.width = svgElement.clientWidth;
+      canvas.height = svgElement.clientHeight;
+      ctx.drawImage(img, 0, 0);
+      DOMURL.revokeObjectURL(url);
+  
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF();
+      pdf.addImage(imgData, 'PNG', 10, 10, 180, 100);
+      pdf.save('bar_chart.pdf');
+    };
+    img.src = url;
+  };
+  
+  
   useEffect(() => {
     const fetchCapteurs = async () => {
       try {
@@ -62,6 +90,8 @@ function BarChartComponent({ selectedSensorIds, onWeeksChange }) {
 
   return (
     <div>
+          <button className="mr-4" onClick={exportToPdf}>Export to PDF</button>
+
       <h2 style={{ textAlign: 'center', margin: '20px 0' }}>Histogrammes Hebdomadaires</h2>
       
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '20px' }}>
