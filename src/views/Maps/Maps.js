@@ -41,7 +41,6 @@ const Maps = () => {
           setData(fetchedData.map(item => ({
             ...item,
             value: item.TotalValeur
-       
           })));
         })
         .catch(error => console.error('Error fetching data:', error));
@@ -70,18 +69,27 @@ const Maps = () => {
       attribution: `&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors`,
     }).addTo(map);
 
-    const markers = L.markerClusterGroup();
+    const createClusterCustomIcon = function(cluster) {
+      const markers = cluster.getAllChildMarkers();
+      const totalValue = markers.reduce((sum, marker) => sum + marker.options.value, 0);
+      const color = calculateColor(totalValue, 0, 100); // Modifiez les valeurs min et max selon vos données
 
-  
-
-    data.forEach(item => {
-      const marker = L.marker([item.Capteur_lat, item.Capteur_long], { icon: DefaultIcon });
-      marker.bindPopup(`<b>${item.Station_point_de_depart}</b><br>Valeur : ${item.value}`);
-      console.log("valeur",item.value)
-      markers.addLayer(marker);
+      return L.divIcon({
+        html: `<div style="background-color: ${color}; color: white; border-radius: 50%; padding: 10px; font-size: 14px; display: flex; align-items: center; justify-content: center;">${totalValue}</div>`,
+        className: 'marker-cluster-custom',
+        iconSize: L.point(40, 40, true),
+      });
+    };
+    
+    const markers = L.markerClusterGroup({
+      iconCreateFunction: createClusterCustomIcon
     });
 
-
+    data.forEach(item => {
+      const marker = L.marker([item.Capteur_lat, item.Capteur_long], { icon: DefaultIcon, value: item.value });
+      marker.bindPopup(`<b>${item.Station_point_de_depart}</b><br>Valeur : ${item.value}`);
+      markers.addLayer(marker);
+    });
 
     map.addLayer(markers);
 
@@ -100,6 +108,3 @@ const Maps = () => {
 };
 
 export default Maps;
-
-
-

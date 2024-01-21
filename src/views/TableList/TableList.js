@@ -9,7 +9,7 @@ import "./App.css";
 import { FaPlus, FaTrash } from "react-icons/fa";
 import BarChartComponent from "./BarChart";
 import HebdomadaireTable from "./HebdomadaireTable";
-
+import MonthlyChart from "./MonthlyChart"
 moment.locale("fr");
 
 const localizer = momentLocalizer(moment);
@@ -64,7 +64,6 @@ function App() {
       const newSelectedSensorIds = [...prevSensorIds];
       newSelectedSensorIds[index] = selectedSensorId;
       console.log("Selected Sensor IDs:", newSelectedSensorIds);
-      // Removed the call to fetchDataForSensors
       return newSelectedSensorIds;
     });
   };
@@ -83,13 +82,11 @@ function App() {
   };
 
   const handleAddSensorId = () => {
-    // Check if there are available sensor IDs not already selected
     const availableSensorIds = capteurs.map((capteur) => capteur.id_capteur);
     const newSensorIds = availableSensorIds.filter(
       (id) => !selectedSensorIds.includes(id)
     );
 
-    // If there are available sensor IDs, add the first one to selectedSensorIds
     if (newSensorIds.length > 0) {
       setSelectedSensorIds([...selectedSensorIds, newSensorIds[0]]);
     }
@@ -106,12 +103,10 @@ function App() {
     setSelectedSensorIds(updatedSensorIds);
   };
 
-  // Définir la date par défaut sur janvier 2022
   const defaultDate = moment("2018-01-01").toDate();
 
 
   useEffect(() => {
-    // Fetch capteurs data on component mount
     const fetchCapteurs = async () => {
       try {
         const response = await fetch("http://localhost:3000/api/data/capteur");
@@ -224,6 +219,8 @@ function App() {
             selectedDates={formatSelectedDates()}
             selectedSensorIds={selectedSensorIds}
           />
+
+
         </>
       )}
     </div>
@@ -239,6 +236,12 @@ function App() {
       selectedSensorIds={selectedSensorIds}
       weeks={selectedWeeks}
     />
+    <MonthlyChart
+      selectedSensorIds={selectedSensorIds}
+     
+    />
+
+
   </div>
 );
 
